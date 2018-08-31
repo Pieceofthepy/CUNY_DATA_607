@@ -1,0 +1,78 @@
+---
+title: "DATA_607 Assigment 1: Subset Mushroom Dataset"
+output: html_notebook
+---
+### Begin Assignment 1
+
+### Load Libraries
+```{r}
+library(plyr)
+```
+
+### Load Base Mushroom Data
+```{r}
+x <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data"))
+y <- data.frame(x)
+
+head(y)
+
+dim(y)
+```
+
+### Subset Data
+
+### On the basis of attributes most likely assigned to poisonous mushrooms, I have selected three atributes, Habbitat (u), Cap color (n), Population (S.3)
+
+```{r}
+Mushroom_Data_Subset <- y[c(1,4,22,23)]
+head(Mushroom_Data_Subset,50)
+```
+
+### Rename Columns
+
+```{r}
+newcolumnames <- c("Poisonous?", "Cap Color","Population","Habitat")
+colnames(Mushroom_Data_Subset) <- newcolumnames
+head(Mushroom_Data_Subset)
+```
+
+### Rename Values
+
+```{r}
+
+Poisonous <- Mushroom_Data_Subset[, "Poisonous?"]
+Mushroom_Data_Subset[, "Poisonous?"] <- ifelse( Poisonous == "p", "Poisonous" , "Edible")
+
+Mushroom_Data_Subset$`Cap Color` <- as.character(Mushroom_Data_Subset$`Cap Color`)
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "n"] <- "Brown"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "b"] <- "Buff"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "c"] <- "Cinnamon"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "g"] <- "Grey"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "r"] <- "Green"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "p"] <- "Pink"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "u"] <- "Purple"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "e"] <- "Red"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "w"] <- "White"
+Mushroom_Data_Subset$`Cap Color`[Mushroom_Data_Subset$`Cap Color` == "y"] <- "Yellow"
+
+Mushroom_Data_Subset$Population <- as.character(Mushroom_Data_Subset$Population)
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "a"] <- "Abundant"
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "c"] <- "Clustered"
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "n"] <- "Numerous"
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "s"] <- "Scattered"
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "v"] <- "Several"
+Mushroom_Data_Subset$Population[Mushroom_Data_Subset$Population == "y"] <- "Solitary"
+
+Mushroom_Data_Subset$Habitat <- as.character(Mushroom_Data_Subset$Habitat)
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "g"] <- "Grasses"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "l"] <- "Leaves"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "m"] <- "Meadows"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "p"] <- "Path"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "u"] <- "Urban"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "w"] <- "Waste"
+Mushroom_Data_Subset$Habitat[Mushroom_Data_Subset$Habitat == "d"] <- "Woods"
+
+head(Mushroom_Data_Subset,50)
+dim(Mushroom_Data_Subset)
+```
+### End Assignment 1
