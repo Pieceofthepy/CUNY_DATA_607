@@ -1,0 +1,14 @@
+---
+title: "Import SQLite3 Table"
+output: html_notebook
+---
+
+```{r}
+getwd()
+```
+
+```{r}
+data <- read.csv("data.csv", header = TRUE)
+data
+```
+

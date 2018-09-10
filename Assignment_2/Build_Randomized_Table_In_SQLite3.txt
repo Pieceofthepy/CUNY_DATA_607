@@ -1,0 +1,42 @@
+Last login: Sun Sep  9 19:16:09 on ttys000
+MacPros-MacBook-Pro:~ yourdirectory$ pwd
+/Users/yourdirectory
+MacPros-MacBook-Pro:~ yourdirectory $ cd /Users/yourdirectory/CUNY_DATA_607 
+MacPros-MacBook-Pro:CUNY_DATA_607 yourdirectory $ pwd
+/Users/yourdirectory/CUNY_DATA_607
+MacPros-MacBook-Pro:CUNY_DATA_607 yourdirectory $ sqlite3 CUNY_DATA_607.db
+SQLite version 3.22.0 2018-01-22 18:45:57
+Enter ".help" for usage hints.
+sqlite> create table Movies_Ranked (Movie text primary key, Alice int, Bob int, Carl int, Dan int, Edward int);
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Matrix', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('Pulp Fiction', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Shining', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Place Beyond the Pines', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('Blade Runner 2049', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The incredibles ii', ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5), ABS(RANDOM() % 5));
+sqlite> .mode column
+sqlite> .headers on
+sqlite> select * from Movies_Ranked;
+Movie       Alice       Bob         Carl        Dan         Edward    
+----------  ----------  ----------  ----------  ----------  ----------
+The Matrix  3           2           4           0           3         
+Pulp Ficti  2           0           4           3           0         
+The Shinin  2           3           0           0           0         
+The Place   0           1           3           3           3         
+Blade Runn  0           0           2           1           4         
+The incred  3           1           2           1           3         
+sqlite> .width 26 30
+sqlite> select * from Movies_Ranked;
+Movie                       Alice                           Bob         Carl        Dan         Edward    
+--------------------------  ------------------------------  ----------  ----------  ----------  ----------
+The Matrix                  3                               2           4           0           3         
+Pulp Fiction                2                               0           4           3           0         
+The Shining                 2                               3           0           0           0         
+The Place Beyond the Pines  0                               1           3           3           3         
+Blade Runner 2049           0                               0           2           1           4         
+The incredibles ii          3                               1           2           1           3         
+sqlite> .mode csv
+sqlite> .output data.csv
+sqlite> select * from Movies_Ranked;
+sqlite> .exit
+MacPros-MacBook-Pro:CUNY_DATA_607 yourdirectory$ 
