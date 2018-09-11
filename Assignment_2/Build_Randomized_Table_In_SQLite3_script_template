@@ -1,0 +1,24 @@
+create table Movies_Ranked (Movie text primary key, Alice int, Bob int, Carl int, Dan int, Edward int);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Matrix', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Shining', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Place Beyond the Pines', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('Pulp Fiction', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('Blade Runner 2049', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+insert into Movies_Ranked (Movie, Alice, Bob, Carl, Dan, Edward) values('The Incredibles ii', ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1, ABS(RANDOM()) % (6 - 1) + 1);
+
+.headers on
+
+.mode csv
+
+.output data.csv
+
+select * from Movies_Ranked;
+
+.exit
+

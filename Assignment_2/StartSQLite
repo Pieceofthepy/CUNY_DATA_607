@@ -1,0 +1,2 @@
+cd /Users/jackrusso/CUNY_DATA_607/SQLite3 
+sqlite3 CUNY_DATA_607.db
