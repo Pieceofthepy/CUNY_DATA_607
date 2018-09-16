@@ -1,0 +1,132 @@
+---
+title: "Week 3 Assignment"
+output: html_notebook
+---
+
+# 3
+```{r}
+
+# Part One 
+library(stringr)
+
+# Unstructured Text
+raw.data <-"555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555-6542Rev. Timothy Lovejoy555
+8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert"
+
+# Extract all raw names 
+name <- unlist(str_extract_all(raw.data, "[[:alpha:]., ]{2,}"))
+
+# Replaces the charater C with Charles
+first_name <- str_replace(name, "C.", "Charles")
+
+# Extracts longest possible string of characters following punctuation without spaces
+first_name <- str_extract(first_name, "[[:punct:]]\\s[[:alpha:]]+")
+
+# Extracts only the alphabetical charcters from list 
+first_name <- str_extract(first_name, "[[:alpha:]]+")
+
+# Replaces NAs with missing first names from name
+first_name[is.na(first_name)] <- str_extract(name, "[[:alpha:]]+")[is.na(first_name)]
+
+# Selects last name by via pipe operator.
+last_name <- str_extract(name,"[[:alpha:]]+($|,)")
+
+# Removes punctuation 
+last_name <- str_extract(last_name,"[[:alpha:]]+")
+
+# Creates Data Frame
+data.frame(first_name, last_name)
+
+
+```
+
+```{r}
+# Part Two
+
+# Detects Doctor or Reverend by detecting 2 or 3 aphabetic sequence followed by a period 
+Is_Doctor_Or_Reverend <- str_detect(name, "[[:alpha:]]{2,3}[.]")
+data.frame(first_name, last_name, Is_Doctor_Or_Reverend)
+```
+
+```{r}
+# Part Three
+
+# Removes Doctor or Reverend from Has_Second_Name
+Has_Second_Name <- str_replace(name, "[[:alpha:]]{2,3}[.]", "")
+
+# Counts total names, first and last. 
+Has_Second_Name <- str_count(Has_Second_Name, "\\w+")
+
+# Checks instances where total names exceed two.
+Has_Second_Name <- Has_Second_Name > 2
+
+data.frame(first_name, last_name, Is_Doc_Or_Reverend, Has_Second_Name)
+```
+
+
+# 4
+
+```{r}
+# Part One
+
+# [0-9]+\\$
+
+# This expression extacts any sequence of numbers preceeding a dollar sign.
+
+
+Phonebook <- c(" JoeShmo 12121212$")
+
+unlist(str_extract_all(Phonebook, "[0-9]+\\$"))
+
+
+```
+
+```{r}
+# Part Two
+
+# \\b[a-z]{1,4}\\b
+
+# Extracts all sequences of lowercase letters between one and four. 
+
+SingingWarmup <- c(" doe ray me fa so la ti doe ")
+
+unlist(str_extract_all(SingingWarmup, "\\b[a-z]{1,4}\\b"))
+
+```
+
+
+```{r}
+# Part Three 
+
+# .*?\\.txt$
+
+# This expression prints everything that preceeds '.txt'
+
+SomeDirectory <- c("/Users/someguy/desktop/test.txt")
+unlist(str_extract_all(SomeDirectory, ".*?\\.txt$"))
+
+```
+
+```{r}
+# Part Four 
+
+# \d{2}/\d{2}/\d{4}
+
+# This expression selects all dates in a string that conform to the syntax mm/dd/yyyy
+
+Important_Historical_Dates <- c("12/07/1941  11/23/63  09/11/2001")
+
+unlist(str_extract_all(Important_Historical_Dates, "\\d{2}/\\d{2}/\\d{4}"))
+
+```
+
+```{r}
+# Part Five
+
+# <(.+?)>.+?</\\1>
+
+# Removes HTML tag from HTML Document
+
+HTMLdoc <- c("<!DOCTYPE html><html><body>This is a Test</body></html></html>")
+unlist(str_extract_all(HTMLdoc, "<(.+?)>.+?</\\1>"))
+```
