@@ -1,0 +1,85 @@
+---
+title: "Assignment 4"
+output: html_notebook
+---
+
+# Is there a statisically signifigant difference between the sampled airlines' punctuality?
+
+```{r}
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_DATA_607_Assignments/master/Assignment%204/numbersense.csv")
+```
+
+# Load CSV.
+
+```{r}
+Airline_data <- read.csv(x, header = TRUE)
+Airline_data 
+```
+
+# Load Dplyr; Load Tidyr.
+
+```{r}
+library(tidyr) ; library(dplyr)
+```
+
+# Format destinations.
+
+```{r}
+Airline_data <- rename(Airline_data, 'Los Angeles' = Los.Angeles, 'San Diego' = San.Diego, 'San Francisco' = San.Francisco)
+Airline_data
+```
+
+# Split set by airline.
+
+```{r}
+Alaskian_Air <- filter(Airline_data, Airline == "ALASKA")
+AM_West_Air <- filter(Airline_data, Airline == "AM WEST")
+Alaskian_Air ; AM_West_Air
+```
+
+# Convert to long form.
+
+```{r}
+AM_West_Air <- gather(AM_West_Air, Destination, Number_of_Flights, 'Los Angeles', Phoenix, 'San Diego', 'San Francisco', Seattle)
+Alaskian_Air <- gather(Alaskian_Air, Destination, Number_of_Flights, 'Los Angeles', Phoenix, 'San Diego', 'San Francisco', Seattle)
+AM_West_Air ; Alaskian_Air
+```
+
+# Convert 'Number of Flights' to proportion of total.
+
+```{r}
+AM_West_Air <- rename(AM_West_Air, Proportion_of_Flights = Number_of_Flights)
+Alaskian_Air <- rename(Alaskian_Air, Proportion_of_Flights = Number_of_Flights)
+AM_West_Air ; Alaskian_Air
+```
+
+```{r}
+AM_West_Air$Proportion_of_Flights <- round((AM_West_Air$Proportion_of_Flights/sum(AM_West_Air$Proportion_of_Flights)), digits = 3)
+Alaskian_Air$Proportion_of_Flights <- round((Alaskian_Air$Proportion_of_Flights/sum(Alaskian_Air$Proportion_of_Flights)), digits = 3)
+AM_West_Air ; Alaskian_Air
+```
+
+# Subset delays.
+
+```{r}
+AM_West_Air <- filter(AM_West_Air, Schedule == 'delayed')
+Alaskian_Air <- filter(Alaskian_Air, Schedule == 'delayed')
+AM_West_Air ; Alaskian_Air
+```
+
+# Which sample has a greater mean proportion of delayed flights?
+
+```{r}
+mean(AM_West_Air$Proportion_of_Flights) == mean(Alaskian_Air$Proportion_of_Flights)
+mean(AM_West_Air$Proportion_of_Flights) < mean(Alaskian_Air$Proportion_of_Flights)
+```
+
+
+
+# Are the differences in the mean proportions of delays between these two airlines statistically signifigant? Let's conduct a two sided t test to find out.
+
+```{r}
+t.test(AM_West_Air$Proportion_of_Flights, Alaskian_Air$Proportion_of_Flights, var.equal = FALSE )
+```
+
+# Since p-value is greater than 0.05, it means we fail to reject the null hypothesis. It implies there are no significant differences between the means of the proportions of delays between our sampled airlines.
