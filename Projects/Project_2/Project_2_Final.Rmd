@@ -1,0 +1,237 @@
+---
+title: "Project 2"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+```
+
+# Data Set 1: U.S. 1980 Census
+
+# The Ericksen data frame has 66 rows and 9 columns. The observations are 16 large cities, the remaining parts of the states in which these cities are located, and the other U. S. states.
+
+```{r}
+u <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_SPS_RFDS_Bridge_Datasets/master/csv/carData/Ericksen.csv")
+Census_Data <- read.csv(u,header = TRUE)
+glimpse(Census_Data)
+```
+
+```{r}
+Census_Data <- Census_Data %>%
+  filter(complete.cases(.)) %>%
+  rename('Observation' = X, 'Percentage_Black_or_Hispanic' = minority, 'Rate_of_Serious_Crimes_per_1000_People' = crime, 'Percent_Living_in_Poverty' = poverty, 'Percent_Difficulty_Speaking_English' = language ,'Percent_Age_25_and_Older_or_Who_Had_Not_Finished_Highschool' = highschool, 'Percentage_of_Housing_in_Small, Multi-Unit_Buildings' = housing, 'Is_State_or_City' = city,'Percentage_of_Households_Counted_by_Conventional_Personal_Enumeration' = conventional, 'Preliminary_Percent_Estimate_of_Undercount' = undercount) %>%
+  arrange(desc(Preliminary_Percent_Estimate_of_Undercount)) %>%
+  glimpse()
+```
+
+
+# Edit Row values
+```{r}
+# Format Locations
+Observation_edit <- unlist(str_replace_all(Census_Data$Observation, "[[:punct:]]R{1}", " "))
+Observation_edit <- unlist(str_replace_all(Observation_edit, "[[:punct:]]{1}", " "))
+Observation_edit <- unlist(str_replace_all(Observation_edit, "[[:space:]]DC{1}", "D.C."))
+Census_Data$Observation <- Observation_edit
+
+# Format State, City
+Is_City_Or_State_edit <- unlist(str_replace_all(Census_Data$`Is_State_or_City`, "state", "State"))
+Is_City_Or_State_edit <- unlist(str_replace_all(Is_City_Or_State_edit, "city", "City"))
+Census_Data$`Is_State_or_City` <- Is_City_Or_State_edit
+```
+
+# Convert 'Rate_of_Serious_Crimes_per_1000_People' to percent.
+
+```{r}
+Census_Data <- rename(Census_Data, 'Percent_of_Serious_Crimes_per_1000_People' = Rate_of_Serious_Crimes_per_1000_People)
+Census_Data$Percent_of_Serious_Crimes_per_1000_People <- Census_Data$Percent_of_Serious_Crimes_per_1000_People/1000
+```
+
+# Seperate the Overcount from Undercount, creating a new column with the negative values called "overcount"
+
+```{r}
+Overcount <-filter(Census_Data, Preliminary_Percent_Estimate_of_Undercount < 0)
+Undercount <- filter(Census_Data, Preliminary_Percent_Estimate_of_Undercount > 0)
+Overcount ; Undercount
+```
+
+# Seperate States from Cities 
+
+```{r}
+Undercount_State <- filter(Undercount, Is_State_or_City == "State")
+Undercount_City <- filter(Undercount, Is_State_or_City == "City")
+```
+
+# Analysis
+
+# Is there a statistically significant relationship between a cities' percentage of Black or Hispanic inhabitants, and the preliminary percent estimate of undercount in the 1980 Census?
+
+# Measure Corolation 
+
+```{r}
+cor(Undercount_City$Percentage_Black_or_Hispanic, Undercount_City$Preliminary_Percent_Estimate_of_Undercount)
+```
+
+# There is a strong corolation between these varriables, but is it significant?
+
+```{r}
+# As you can see below the p-value for this relationship is less than .05. Which means we must reject the alternative hypothesis.  
+cor.test(Undercount_City$Percentage_Black_or_Hispanic, Undercount_City$Preliminary_Percent_Estimate_of_Undercount)
+```
+
+# This result should be taken with a grain of salt given that the distributions of Percentage Black or Hispanic Undercount Estimate are disimilar.
+# We should also be cautious because the variable is an 'or' variable. It's not clear if a city had a higher black or hispanic population.
+
+```{r}
+qqnorm(Undercount_City$Percentage_Black_or_Hispanic)
+qqline(Undercount_City$Percentage_Black_or_Hispanic)
+```
+
+
+# Data set 2: Voting Intentions in the 1988 Chilean Plebiscite
+
+# The Chile data frame has 2700 rows and 8 columns. The data are from a national survey conducted in April and May of 1988 by FLACSO/Chile. There are some missing data.
+
+# Import Data
+
+```{r} 
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_SPS_RFDS_Bridge_Datasets/master/csv/carData/Chile.csv")
+Chile_88_Voter_Data <- read.csv(x, header = TRUE)
+glimpse(Chile_88_Voter_Data)
+```
+
+# Clean Data, Rename Columns, Arrange by Support for Status Quo
+
+```{r}
+Chile_88_Voter_Data <- Chile_88_Voter_Data %>%
+  filter(complete.cases(.)) %>%
+  rename("Observation" = X, "Region" = region, "Population" = population, "Sex" = sex, "Age" = age, "Education" = education,   "Monthly_Income_In_Chilean_Pesos" = income, "Supports_Status_Quo" = statusquo, "Plans_To_Vote" = vote) %>%
+  arrange(desc(Supports_Status_Quo)) %>%
+  glimpse()
+```
+
+# Change Level Labels
+
+```{r}
+# Region 
+levels(Chile_88_Voter_Data$Region) <- c("C" = "Central", "M" = "Metropolitan Santiago Area", "N" = "North", "S" = "South", "SA" = "City of Santiago")
+# Sex
+levels(Chile_88_Voter_Data$Sex) <- c("M" = "Male", "F" = "Female")
+# Education
+levels(Chile_88_Voter_Data$Education) <- c("P" = "Primary", "Ps" = "Post-secondary", "S" = "Secondary")
+# Vote
+levels(Chile_88_Voter_Data$Plans_To_Vote) <- c("A" = "Abstain", "N" = "Will_Vote_Against_Pinochet", "U" = "Undecided", "Y" = "Will_Vote_Against_Pinochet")
+Chile_88_Voter_Data
+```
+
+# Plot qq plot for Support of The Pinochet Regime in 1988.
+
+```{r}
+qqnorm(Chile_88_Voter_Data$Supports_Status_Quo, ylab = "Sampled Supports Status Quo Quantiles", main = "Support for Status Quo")
+qqline(Chile_88_Voter_Data$Supports_Status_Quo)
+
+qqnorm(Chile_88_Voter_Data$Age, ylab = "Sampled Age Quantiles", main = "Age")
+qqline(Chile_88_Voter_Data$Age)
+```
+
+# Acording to CBS news
+
+```{r}
+url("https://www.cbsnews.com/news/chile-dictator-augusto-pinochet-atrocities-secrects/")
+```
+
+# At least 3,095 people were killed during Pinochet's dictatorship, according to government figures, and tens of thousands more were tortured or jailed for political reasons. 
+
+# It is therefore surprising that fifteen years after the regime took power that so many could still be heavily in favor of it.
+
+# Unfortunately, of the available variables in this dataset only Age and Support for Status Quo were similarly and normaly distributed.
+
+# Nonetheless, this allows us to test if there is a significant relationship between the two.
+
+```{r}
+# As we can see below, there is only about a ten percent corolation between the varriables Age and Support for Status Quo. We can also be confident in this result because the p-vaule is orders of magnitude below .05
+cor.test(Chile_88_Voter_Data$Supports_Status_Quo, Chile_88_Voter_Data$Age)
+```
+
+# Data set 3: Well Switching in Bangladesh.
+
+# Data on whether or not households in Bangladesh changed the wells that they were using.
+
+```{r}
+# The data are for an area of Arahazar upazila, Bangladesh. The researchers labelled each well with its level of arsenic and an indication of whether the well was “safe” or “unsafe.” Those using unsafe wells were encouraged to switch. After several years, it was determined whether each household using an unsafe well had changed its well. These data are used by Gelman and Hill (2007) for a logistic-regression example.
+```
+
+```{r}
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_SPS_RFDS_Bridge_Datasets/master/csv/carData/Wells.csv")
+Bangladesh_Well_Data <- read.csv(x, header = TRUE)
+glimpse(Bangladesh_Well_Data)
+```
+
+# Clean Data, Rename Columns
+
+```{r}
+Bangladesh_Well_Data <- Bangladesh_Well_Data %>%
+  filter(complete.cases(.)) %>%
+  rename("Observation" = X, "Switched_Wells_After_Learning_Arsenic_Levels" = switch, "Arsenic_Levels" = arsenic, "Distance_in_meters_to_the_closest_known_safe_well" = distance, "Years_of_Education" = education, "Participated_in_any_Community_Association" = association) %>%
+  arrange(desc(Years_of_Education)) %>%
+  glimpse()
+```
+
+# Change Factor Levels to Numeric  
+
+```{r}
+#  Switched Wells After Learning Arsenic Levels.
+Bangladesh_Well_Data$Switched_Wells_After_Learning_Arsenic_Levels <- as.numeric(Bangladesh_Well_Data$Switched_Wells_After_Learning_Arsenic_Levels )
+
+#  Participated in any Community Association.
+Bangladesh_Well_Data$Participated_in_any_Community_Association  <- as.numeric(Bangladesh_Well_Data$Participated_in_any_Community_Association)
+glimpse(Bangladesh_Well_Data)
+```
+
+# Relevant qq-plots
+
+```{r}
+# Education.
+qqnorm(Bangladesh_Well_Data$Years_of_Education, ylab = "Sample Education Quantile", main = "Education")
+qqline(Bangladesh_Well_Data$Years_of_Education)
+```
+
+```{r}
+# Education.
+qqnorm(Bangladesh_Well_Data$Distance_in_meters_to_the_closest_known_safe_well, ylab = "Sample Distance in Meters to the Closest Known Safe Well Quantile", main = "Sample Distance in Meters to the Closest Known Safe Well")
+qqline(Bangladesh_Well_Data$Distance_in_meters_to_the_closest_known_safe_well)
+```
+
+```{r}
+# Distance to Well.
+qqnorm(Bangladesh_Well_Data$Distance_in_meters_to_the_closest_known_safe_well, ylab = "Sample Distance in meters to the closest known safe well Quantile", main = "Distance in Meters to the Closest Known Safe Well")
+qqline(Bangladesh_Well_Data$Distance_in_meters_to_the_closest_known_safe_well)
+```
+
+```{r}
+# Arsenic Levels.
+qqnorm(Bangladesh_Well_Data$Arsenic_Levels, ylab = "Sample Arsenic Levels Quantile", main = "Arsenic Levels")
+qqline(Bangladesh_Well_Data$Arsenic_Levels)
+```
+
+
+# Analysis: Did Membership in Community Association Significantly Impact an Individual's Decision to Switch Wells? 
+
+# Both are binary variables, so the comparision should be appropriate.
+
+```{r}
+# As can be seen below, there is actualy significant but a very week negative relationship between these two variable. 
+cor.test(Bangladesh_Well_Data$Switched_Wells_After_Learning_Arsenic_Levels,Bangladesh_Well_Data$Participated_in_any_Community_Association)
+```
+
+# Meta-Analysis:  Did High Arsenic Levels in Local Wells Predict Longer Distance to a Safe Well.
+
+# Both are similarly distributed, so the comparision should be appropriate.
+
+```{r}
+# Significant Relationship; Notable but Week.
+cor.test(Bangladesh_Well_Data$Arsenic_Levels,Bangladesh_Well_Data$Distance_in_meters_to_the_closest_known_safe_well)
+```
+
