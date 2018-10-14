@@ -1,0 +1,67 @@
+---
+title: "Week Seven Assignment"
+output: html_notebook
+---
+
+# Assignment – Working with XML and JSON in R
+
+## Pick three of your favorite books on one of your favorite subjects. At least one of the books should have more than one author. For each book, include the title, authors, and two or three other attributes that you find interesting.
+
+## Take the information that you’ve selected about these three books, and separately create three files which store the book’s information in HTML (using an html table), XML, and JSON formats (e.g. “books.html”, “books.xml”, and “books.json”). To help you better understand the different file structures, I’d prefer that you create each of these files “by hand” unless you’re already very comfortable with the file formats.
+
+##  Write R code, using your packages of choice, to load the information from each of the three sources into separate R data frames. Are the three data frames identical?
+
+##  Your deliverable is the three source files and the R code. If you can, package your assignment solution up into an .Rmd file and publish to rpubs.com. [This will also require finding a way to make your three text files accessible from the web].
+
+
+# Get package XML, RJson
+```{r}
+#install.packages("XML")
+#install.packages("rjson")
+```
+
+# XML
+```{r}
+library(XML)
+library(rjson)
+```
+
+# Check Working Directory
+```{r}
+# Place All Import Files in This Directory If Your Are Not Reading From Github. 
+getwd()
+```
+
+# HTML 
+```{r}
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_DATA_607_Assignments/master/Week_7_Assignment/Assignment_7.html")
+x <- readLines(x)
+Holy_Books <- readHTMLTable(x)
+y <- do.call(rbind, Holy_Books)
+colnames(y) <- names(Holy_Books[[1]][[1]])
+z <- y[,-1]
+rownames(z) <- y[,1]
+z
+```
+
+# XML
+```{r}
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_DATA_607_Assignments/master/Week_7_Assignment/Assignment_7.xml")
+x <- readLines(x)
+y <- xmlToDataFrame(x)
+y
+```
+# JSON
+```{r}
+x <- url("https://raw.githubusercontent.com/Pieceofthepy/CUNY_DATA_607_Assignments/master/Week_7_Assignment/Assignment_7_JSON.json")
+x <- fromJSON(file = x)
+y <- lapply(x, function(Holy_Books) 
+  {
+  data.frame(matrix(unlist(Holy_Books), ncol=4, byrow=T))
+  })
+y <- do.call(rbind, y)
+colnames(y) <- names(x[[1]][[1]])
+y
+```
+
+# Final comment; Though HTML, XML, and JSON tables are indeed similar, the methods available to format those tables into data frames cause the final output to vary in appearance.
