@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Catalog>
+   <Book id="Holy Book 1">
+      <Author>Gautama, Siddartha</Author>
+      <Title>The Damapada</Title>
+      <Genre>Religious Text</Genre>
+      <Century>Third Century B.C.E.</Century>
+      <Chapters>26</Chapters>
+   </Book>
+   <Book id="Holy Book 2">
+      <Author>Apostles, The</Author>
+      <Title>The New Testament</Title>
+      <Genre>Religious Text</Genre>
+      <Century>80 A.C.E to 120 A.C.E</Century>
+      <Chapters>27</Chapters>
+   </Book>
+   <Book id="Holy Book 3">
+      <Author>Muhammad, The Prophet</Author>
+      <Title>The Koran</Title>
+      <Genre>Religious Text</Genre>
+      <Century>609 A.C.E to 632 A.C.E</Century>
+      <Chapters>114</Chapters>
+   </Book>
+</Catalog>

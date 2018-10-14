@@ -1,0 +1,22 @@
+{
+	"Holy Books": [
+	{
+	"Title":"The Dammapada",
+	"Author":"The Buddha",
+	"Date Writen":"Third Century B.C.E.",
+	"Number of Chapters in Text":"26"
+	},
+	{
+	"Title":"The New Testament",
+	"Author":"The Apostles",
+	"Date Writen":"80 A.C.E to 120 A.C.E",
+	"Number of Chapters in Text":"27"
+	},
+	{
+	"Title":"The Koran",
+	"Author":"The Prophet Muhammad",
+	"Date Writen":"609 A.C.E to 632 A.C.E",
+	"Number of Chapters in Text":"114"
+	}
+  ]
+}
