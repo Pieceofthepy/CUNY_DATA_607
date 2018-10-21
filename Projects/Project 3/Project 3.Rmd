@@ -1,0 +1,80 @@
+---
+title: "Project 3"
+output: html_notebook
+---
+
+# Load Libraries
+```{r}
+library(dplyr)
+```
+
+# Load Data
+```{r}
+x <- "/Users/codedesk/Documents/CUNY_SPS/Data_607/JoinedEDUData.csv"
+x <- read.csv(x, header = TRUE)
+x
+```
+
+# Check Levels
+
+```{r}
+levels(x$overall_score)
+levels(x$per_pupil_expenditure)
+```
+
+# Remove NAs
+
+```{r}
+sum(is.na(x$overall_score))
+sum(is.na(x$per_pupil_expenditure))
+```
+
+```{r}
+x <- x %>%
+     filter(complete.cases(.)) 
+```
+
+```{r}
+sum(is.na(x$overall_score))
+sum(is.na(x$per_pupil_expenditure))
+```
+
+# Coerce and Scale
+
+```{r}
+x$overall_score <- as.numeric(paste(x$overall_score))/100
+```
+
+```{r}
+x$per_pupil_expenditure <- unclass(x$per_pupil_expenditure)/-2
+```
+
+# Review Data
+
+```{r}
+sum(is.na(x$overall_score))
+sum(is.na(x$per_pupil_expenditure))
+```
+
+```{r}
+x <- x %>%
+     filter(complete.cases(.)) 
+```
+
+```{r}
+sum(is.na(x$overall_score))
+sum(is.na(x$per_pupil_expenditure))
+```
+
+# Test
+
+Ho: The true correlation between teacher performance ratings and per pupil expenditure is zero.
+
+Ha: The true correlation between teacher performance ratings and per pupil expenditure is zero.
+
+```{r}
+cor.test(x$per_pupil_expenditure,x$overall_score)
+```
+
+On the basis of this correlation, we reject the null hypothesis.
+
