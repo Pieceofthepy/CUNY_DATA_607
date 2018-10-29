@@ -1,0 +1,71 @@
+---
+title: "Week 9 Assignment"
+output: html_notebook
+date: 10-25-2018
+---
+
+# Assignment – Web APIs
+
+The New York Times web site provides a rich set of APIs, as described here: http://developer.nytimes.com/docs You’ll need to start by signing up for an API key.
+
+Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it to an R dataframe.
+
+# Note
+
+My solution to week nines' assignment builds upon a previous students' work. 
+
+```{r}
+# Please see
+url("https://rstudio-pubs-static.s3.amazonaws.com/374924_cb2d9b41e61849a78de51d85c88402cc.html")
+```
+
+Credit to Ohannes (Hovig) Ohannessian.
+
+However, I felt his solution could be more complete. This iteration adds URLs which corresponds to each article and adds a way to search the New York Time's archive by key word. You can also expand or contract the number of articles to query.
+
+# Load Libraries
+
+```{r}
+library(httr)
+library(dplyr)
+library(stringi)
+library(stringr)
+library(jsonlite)
+```
+
+# Acess N.Y.T. API
+
+```{r}
+key = # Your API key goes here.
+response<-GET("https://api.nytimes.com/svc/archive/v1/2018/10.json", query = list(api_key = key, order = "by-title", offset = 20))
+```
+
+# Check Status
+```{r}
+response[2]
+```
+
+# Search Archive
+
+```{r}
+getArchive<-function(year, month, mindex, rows, quieries ) {
+  stopifnot(!any(is.na(c(year, month))))
+  stopifnot(year >= 1851)
+  stopifnot(month >= 1 & month <= 12)
+  stopifnot(rows >= 1)
+
+  url<-sprintf("https://api.nytimes.com/svc/archive/v1/%d/%d.json?api-key=%s", year, month, key)
+  response_df<-fromJSON(url,flatten = TRUE)$response$docs
+  
+  stopifnot(is.data.frame(response_df))
+  df <- data.frame(response_df$headline.main[mindex:rows], response_df$web_url[mindex:rows])
+  df = df %>%
+    select( "Headline" = "response_df.headline.main.mindex.rows.", "URL" = "response_df.web_url.mindex.rows.") 
+  indices <- unlist(str_detect(df$Headline, quieries))
+  df[indices,]
+}
+
+# First Argument: Year, Second Argument: Month, Third Argument: Don't Touch!, Fourth Argument: Number of articles you want to query, Fith Argument: Your key word. Be sure to use quotes. 
+
+getArchive(2012, 2, 1, 1000, "Giants" )
+```
