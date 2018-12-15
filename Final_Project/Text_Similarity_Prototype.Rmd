@@ -1,0 +1,131 @@
+---
+title: "Document Similarity with R - Prototype"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r eval=FALSE, include=FALSE}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r include=FALSE}
+usePackage <- function(p) {
+  if (!is.element(p, installed.packages()[,1]))
+    install.packages(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
+```
+
+# Prototype Credit:
+http://fredgibbs.net/tutorials/document-similarity-with-r.html
+
+# Step 1
+```{r}
+Sys.setenv(NOAWT=TRUE)
+```
+
+# Step 2 - Load tm Package
+```{r}
+usePackage("tm")
+```
+
+# Step 3 - Build Corpus
+
+```{r}
+# Note: If using windows, use forward slash to identify directory.
+my.corpus <- Corpus(DirSource("C:/Users/CodeDesk/Documents/Data_607/Final_Project/corpus/r-corpus"))
+```
+
+# Step 4 - Clean Corpus
+
+```{r}
+# Available Transformations
+getTransformations
+```
+
+```{r}
+# Remove Punctuation
+my.corpus <- tm_map(my.corpus, removePunctuation)
+```
+
+```{r}
+# Remove Common English Words
+my.corpus <- tm_map(my.corpus, removeWords, stopwords("english"))
+```
+
+```{r}
+# Remove Short List of Spesific Words
+# my.stops <- c("history","clio", "programming")
+# my.corpus <- tm_map(my.corpus, removeWords, my.stops)
+```
+
+```{r}
+# Remove Long List of Spesific Words
+
+# The file should list all of your words with a space in between. Like this:
+
+# history clio programming historians text mining…
+
+# my.list <- unlist(read.table("PATH TO STOPWORD FILE", stringsAsFactors=FALSE)
+# my.stops <- c(my.list)
+# my.corpus <- tm_map(my.corpus, removeWords, my.stops)
+```
+
+```{r}
+# Lemmatize our corpus
+my.corpus <- tm_map(my.corpus, stemDocument)
+```
+
+```{r}
+# Save Copy of Corpus to place holder varriable
+PH.my.corpus <- my.corpus
+```
+
+# Step 5 - Investigate Texts
+
+```{r}
+# Convert to Term Document Matrix
+my.tdm <- TermDocumentMatrix(my.corpus)
+```
+
+```{r}
+# Review TDM
+inspect(my.tdm)
+```
+
+```{r}
+# Compare your TermDocumentMatrix to a DocumentTermMatrix
+my.dtm <- DocumentTermMatrix(my.corpus, control = list(weighting = weightTfIdf, stopwords = TRUE))
+inspect(my.dtm)
+```
+
+```{r}
+# Find all words that appear at least twice in any document.
+findFreqTerms(my.tdm, 2)
+# Thrice
+findFreqTerms(my.tdm, 3)
+```
+
+```{r}
+# Inspect Word Associations
+findAssocs(my.tdm, 'mine', 0.20)
+```
+
+```{r}
+# See Visual Relationships of Words and Texts
+my.df <- as.data.frame(inspect(my.tdm))
+my.df.scale <- scale(my.df)
+d <- dist(my.df.scale,method="euclidean")
+fit <- hclust(d, method="ward")
+plot(fit)
+```
+

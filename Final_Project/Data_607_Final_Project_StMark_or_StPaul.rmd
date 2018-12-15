@@ -1,0 +1,349 @@
+---
+title: " Corpus Christi: Did Saint Paul Author the Gospel of Mark? A Statistical Analysis."
+author: "Jack Russo"
+date: 12-12-2018
+output: html_notebook
+---
+
+```{r include=FALSE}
+# package loader
+usePackage <- function(p) {
+  if (!is.element(p, installed.packages()[,1]))
+    install.packages(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
+```
+
+```{r include=FALSE}
+# Selects p.value of Linear Model
+lmp = function (modelobject) {
+    if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
+    f <- summary(modelobject)$fstatistic
+    p <- pf(f[1],f[2],f[3],lower.tail=F)
+    attributes(p) <- NULL
+    return(p)
+}
+```
+
+```{r include=FALSE}
+# Cleaning Function
+corpus.cleaning <- function(x){
+  NT.corpus.cleaned <- tm_map(x, tolower)
+  NT.corpus.cleaned <- tm_map(NT.corpus.cleaned, removePunctuation)
+  NT.corpus.cleaned <- tm_map(NT.corpus.cleaned, removeWords, stopwords("english"))
+  tm_map(NT.corpus.cleaned, stemDocument)
+  return(NT.corpus.cleaned)
+}
+```
+
+```{r include=FALSE}
+# Pastes 8 Texts as Character Strings
+target.texts <- function(a,b,c,d,e,f,g,h){
+  c(paste(a,collapse = ' '),paste(b,collapse = ' '),paste(c,collapse = ' '),paste(d,collapse = ' '),paste(e,collapse = ' '),paste(f,collapse = ' '),paste(g,collapse = ' '),paste(g,collapse = ' '))
+}
+```
+
+# Introduction
+
+Did Saint Paul author the Gospel of Mark? It's a hypothesis that has gained traction in non-mainstream New Testament schoolarishp.
+
+In **Judas of Nazareth: How the Greatest Teacher of First-Century Isreal was Replaced by a Literary Creation**
+
+Daniel T.Unterbrink writes (on page 120):
+
+"That the Gospel of Mark origninates with Peter is paramont to traditional Christian history. Peter is Jesus's preeminent disciple and must have spent countless hours listening to and questioning the Messiah. If the Gospel of Marl originates with Peter, then its authenticity cannot be questioned
+  On the other hand, if the Gospel of Mark is composed by someone in Paul's Christ Movement, then Mark can be rightly questioned..."
+
+The implication being that were the latter true, one of the foundational texts of Christianity would have more in common with a piece of propaganda than a sober documentation of historical events.
+
+This analysis will attempt to build a frame work around how such a determination could be made.
+
+# Import the Tyndale Bible from Project Guttenburg
+
+```{r message=FALSE, warning=FALSE}
+usePackage("gutenbergr")
+Bible <- gutenberg_download(10553)
+```
+
+```{r}
+# Title Page
+Bible$text[1:4]
+# Note: If you are reading inside of Rstudio, you can review the full text by clicking on the "Bible" data frame in the upper right hand corner.
+```
+
+# Isolate Target Texts
+
+The following are the texts being analyized, partitioned by likelyhood of Pauline authorship according to mainstream schoolarishp.
+
+```{r}
+# Consensus 
+
+# Gospel of Mark
+gospel.mark <- unlist(Bible$text[15421:16706])
+
+# Romans
+epistile.romans <- unlist(Bible$text[22556:23423])
+
+# First Corinthians
+epistile.first_corinthians <- Bible$text[23431:24253]
+
+# Second Corinthians
+epistile.Second_corinthians <- Bible$text[24261:24816]
+
+# Galatians
+epistile.galatians <- Bible$text[24824:25100]
+
+# Philippians
+epistile.philippians  <- Bible$text[25392:25587]
+
+# First Thessalonians 
+epistile.first_thessalonians <- Bible$text[25787:25961]
+
+# Philemon
+epistile.philemon <- Bible$text[26568:26608]
+
+# 50/50  Divided on Authenticity 
+
+# Colassians
+epistile.colossians <- Bible$text[25594:25780]
+
+# Second Thessalonians
+epistile.second_thessolonians <- Bible$text[25968:26064]
+
+# 20/80  Divided on Authenticity
+
+# Ephisians
+epistile.ephesians <- Bible$text[25107:25387]
+
+# First Timothy
+epistile.first_timothy <- Bible$text[26071:26296]
+
+# Second Timothy
+epistile.second_timothy <- Bible$text[26303:26460]
+
+# Titus
+epistile.titus <- Bible$text[26468:26561]
+
+# 0/100 Divided on Authenticity
+
+# Hebrews
+epistile.hebrews <- Bible$text[27282:27923]
+```
+
+# Build Corpus
+
+Here we construct a tm corpus of the Gospel of Mark and the seven "authentic" letters of Paul
+
+```{r}
+# Collapse texts into a list of single character strings
+corpus.vector <- target.texts(gospel.mark,epistile.romans,epistile.Second_corinthians,epistile.philemon, epistile.philippians,epistile.first_corinthians,epistile.galatians,epistile.first_thessalonians)
+```
+
+```{r}
+# Declare raw corpus
+Sys.setenv(NOAWT=TRUE)
+usePackage("tm")
+NT.corpus <- Corpus(VectorSource(corpus.vector))
+```
+
+# Clean House
+
+The corpus is refined below.
+
+```{r message=FALSE, warning=FALSE}
+# Remove gramatical artifacts 
+corpus.cleaning <- function(x){
+  NT.corpus.cleaned <- tm_map(x, tolower)
+  NT.corpus.cleaned <- tm_map(NT.corpus.cleaned, removePunctuation)
+  NT.corpus.cleaned <- tm_map(NT.corpus.cleaned, removeWords, stopwords("english"))
+  tm_map(NT.corpus.cleaned, stemDocument)
+  return(NT.corpus.cleaned)
+}
+NT.corpus.cleaned <- corpus.cleaning(NT.corpus)
+```
+
+# Build Term Document Maxtrix and Review
+
+```{r}
+# Build TDM/DTM
+NT.tdm <- TermDocumentMatrix(NT.corpus.cleaned)
+```
+
+```{r}
+inspect(NT.tdm)
+```
+
+# Build Data Frame
+
+Here we output a corpus to a data frame.
+
+```{r message=FALSE, warning=FALSE}
+# Create Tibble
+usePackage("tidytext")
+df.NT <- tidy(NT.tdm)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Split Tibble
+usePackage("dplyr")
+df1 <- df.NT %>% filter(document == "1") %>% select(-document) %>% rename(d1_count = count)
+df2 <- df.NT %>% filter(document == "2") %>% select(-document) %>% rename(d2_count = count)
+df3 <- df.NT %>% filter(document == "3") %>% select(-document)  %>% rename(d3_count = count)
+df4 <- df.NT %>% filter(document == "4") %>% select(-document)  %>% rename(d4_count = count)
+df5 <- df.NT %>% filter(document == "5") %>% select(-document)  %>% rename(d5_count = count)
+df6 <- df.NT %>% filter(document == "6") %>% select(-document)  %>% rename(d6_count = count)
+df7 <- df.NT %>% filter(document == "7") %>% select(-document)  %>% rename(d7_count = count)
+df8 <- df.NT %>% filter(document == "8") %>% select(-document)  %>% rename(d8_count = count)
+```
+
+```{r}
+# Join Tibble
+df.joined <- left_join(df1, df2, by='term') %>% left_join(., df3, by='term') %>% left_join(., df4, by='term') %>% left_join(., df5, by='term') %>% left_join(., df6, by='term') %>% left_join(., df7, by='term') %>% left_join(., df8, by='term')
+```
+
+```{r}
+# Replace NAs With Zero
+df.joined[is.na(df.joined)] <- 0
+```
+
+# Normalize Data
+
+Here each observation of a word is converted to a percent of total words in that document. So for example if a word appears once in document of one hundred words, that word scores one percent.
+
+```{r}
+# Divide each column by total terms in that document.
+df.joined$d1_count <- df.joined$d1_count/sum(df1$d1_count)
+df.joined$d2_count <- df.joined$d2_count/sum(df2$d2_count)
+df.joined$d3_count <- df.joined$d3_count/sum(df3$d3_count)
+df.joined$d4_count <- df.joined$d4_count/sum(df4$d4_count)
+df.joined$d5_count <- df.joined$d5_count/sum(df5$d5_count)
+df.joined$d6_count <- df.joined$d6_count/sum(df6$d6_count)
+df.joined$d7_count <- df.joined$d7_count/sum(df7$d7_count)
+df.joined$d8_count <- df.joined$d8_count/sum(df8$d8_count)
+```
+
+# Build Linear Model
+
+Here we construct a linear model where the word frequency percentages (WFP) of Mark are predicted from the "authentic" epistles' WFPs.
+
+```{r}
+# Build Model
+model.linear = lm(d1_count ~ d2_count + d3_count + d4_count + d5_count + d6_count + d7_count + d8_count, data = df.joined)
+```
+
+After refining the model with the step function, we can see from the model's r-squared value that just north of 40% of the WFPs in Mark can be predicted linearly from the "authentic" epistles.
+
+```{r message=FALSE, warning=FALSE}
+# Refine Model
+model.linear_plus = step(model.linear, direction = "both")
+summary(model.linear_plus)
+```
+
+# Build Sample of R-squareds
+
+Though explaining forty percent of the varriance is notable, it doesn't tell us much about what you would expect to see if you sampled bibilcal texts at random and predicted their WFPs from the pauline epistiles. To do this, we will need a vector containing the r squares of the epistles attributed to, but doubted to be attributed to Paul by mainstream schoolarship.
+
+Below is a function which loops the above process for all Pauline texts in doubt.
+
+```{r message=TRUE, warning=TRUE}
+predictor.pauline = function(y){
+  # Build Corpus Vector
+  corpus.vector <- target.texts(y,epistile.romans,epistile.Second_corinthians,epistile.philemon,   epistile.philippians,epistile.first_corinthians,epistile.galatians,epistile.first_thessalonians)
+  
+  # Declare Corpus
+  Sys.setenv(NOAWT=TRUE)
+  usePackage("tm")
+  NT.corpus <- Corpus(VectorSource(corpus.vector))
+  
+  # Clean Corpus
+  NT.corpus.cleaned <- corpus.cleaning(NT.corpus)
+  
+  # Declare Term Document Matrix
+  NT.tdm <- TermDocumentMatrix(NT.corpus.cleaned)
+  
+  # Declare Tibble
+  usePackage("tidytext")
+  df.NT <- tidy(NT.tdm)
+  
+  # Split Tibble
+  usePackage("dplyr")
+  df1 <- df.NT %>% filter(document == "1") %>% select(-document) %>% rename(d1_count = count)
+  df2 <- df.NT %>% filter(document == "2") %>% select(-document) %>% rename(d2_count = count)
+  df3 <- df.NT %>% filter(document == "3") %>% select(-document)  %>% rename(d3_count = count)
+  df4 <- df.NT %>% filter(document == "4") %>% select(-document)  %>% rename(d4_count = count)
+  df5 <- df.NT %>% filter(document == "5") %>% select(-document)  %>% rename(d5_count = count)
+  df6 <- df.NT %>% filter(document == "6") %>% select(-document)  %>% rename(d6_count = count)
+  df7 <- df.NT %>% filter(document == "7") %>% select(-document)  %>% rename(d7_count = count)
+  df8 <- df.NT %>% filter(document == "8") %>% select(-document)  %>% rename(d8_count = count)
+  
+  # Recombine Tibble
+  df.joined <- left_join(df1, df2, by='term') %>% left_join(., df3, by='term') %>% left_join(., df4, by='term') %>% left_join(., df5, by='term') %>% left_join(., df6, by='term') %>% left_join(., df7, by='term') %>% left_join(., df8, by='term')
+  
+  # Eleminate NAs
+  df.joined[is.na(df.joined)] <- 0
+  
+  # Normalize Data
+  df.joined$d1_count <- df.joined$d1_count/sum(df1$d1_count)
+  df.joined$d2_count <- df.joined$d2_count/sum(df2$d2_count)
+  df.joined$d3_count <- df.joined$d3_count/sum(df3$d3_count)
+  df.joined$d4_count <- df.joined$d4_count/sum(df4$d4_count)
+  df.joined$d5_count <- df.joined$d5_count/sum(df5$d5_count)
+  df.joined$d6_count <- df.joined$d6_count/sum(df6$d6_count)
+  df.joined$d7_count <- df.joined$d7_count/sum(df7$d7_count)
+  df.joined$d8_count <- df.joined$d8_count/sum(df8$d8_count)
+  
+  # Build Model
+  model.pauline.linear = lm(d1_count ~ d2_count + d3_count + d4_count + d5_count + d6_count + d7_count + d8_count, data = df.joined)
+  
+  # Refine Mdoel
+  model.pauline.linear_plus = step(model.pauline.linear, direction = "both")
+  r.2 = summary(model.pauline.linear_plus)$r.squared
+  p_value = lmp(model.pauline.linear_plus)
+  
+  # Return adj.r.2
+  ifelse(p_value < .05, return(r.2), return(NA) )
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+# test function
+summary(model.linear_plus)$r.squared == predictor.pauline(gospel.mark)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Declare Vector of R Squares
+dubious_authorship <- list(gospel.mark, epistile.colossians, epistile.second_thessolonians, epistile.ephesians,epistile.first_timothy, epistile.second_timothy, epistile.titus, epistile.hebrews)
+
+dubious_authorship.rsquares <- c(predictor.pauline(dubious_authorship[1]),predictor.pauline(dubious_authorship[2]),predictor.pauline(dubious_authorship[3]),predictor.pauline(dubious_authorship[4]),predictor.pauline(dubious_authorship[5]),predictor.pauline(dubious_authorship[6]),predictor.pauline(dubious_authorship[7]),predictor.pauline(dubious_authorship[8]))
+```
+
+# Test Statistics 
+
+Finally we can review the results...
+
+```{r}
+# Build Table 
+dubious_authorship.text_names <- c("gospel.mark","epistile.colossians","epistile.second_thessolonians","epistile.ephesians","epistile.first_timothy","epistile.second_timothy","epistile.titus","epistile.hebrews")
+stats.pauline <- data.frame(dubious_authorship.text_names,dubious_authorship.rsquares)
+SD_above_mean <- (dubious_authorship.rsquares - mean(dubious_authorship.rsquares))/sd(dubious_authorship.rsquares)
+stats.pauline <- data.frame(dubious_authorship.text_names,dubious_authorship.rsquares,SD_above_mean,p_value = pf(q = stats.pauline$dubious_authorship.rsquares, df1 = stats.pauline$dubious_authorship.rsquares,df2 = stats.pauline$dubious_authorship.rsquares, ncp = 0, lower.tail = FALSE, log.p = FALSE))
+
+```
+
+The "stats.pauline" table contains the r squared value predicted from the "authentic" letters of Paul and the associated significance values.
+
+```{r}
+# Review Table
+stats.pauline
+shapiro.test(stats.pauline$dubious_authorship.rsquares)
+t.test(stats.pauline$dubious_authorship.rsquares)
+```
+
+# Conclusion
+
+While we do see extreme varriances between the predictive power of the "authentic" epistiles, without access to the true population r squared mean of all epistile predicted New Testament texts, we cannot say any of these results validate or invalidate the Pauline-Mark Hypothesis. 
+
+More work will need to be done to address the flaws with this approach.
+
+Notably, sampling the entire body of New Testament Texts, tightening the requirements for corpus cleaning, locating a copy of the New Testament in Greek that can be read into r, and creating a "tm" package that supports classical Greek.
+
