@@ -79,10 +79,10 @@ The following are the texts being analyized, partitioned by likelyhood of Paulin
 # Consensus 
 
 # Gospel of Mark
-gospel.mark <- unlist(Bible$text[15421:16706])
+gospel.mark <- Bible$text[15421:16706]
 
 # Romans
-epistile.romans <- unlist(Bible$text[22556:23423])
+epistile.romans <- Bible$text[22556:23423]
 
 # First Corinthians
 epistile.first_corinthians <- Bible$text[23431:24253]
